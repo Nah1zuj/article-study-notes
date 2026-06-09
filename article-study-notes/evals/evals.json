@@ -1,0 +1,23 @@
+{
+  "skill_name": "article-study-notes",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Turn a complex current-affairs policy article into a deep Chinese Markdown study note. Ask for note language, depth, portable Markdown enhancements, external scholarly/background supplementation, and destination before drafting. Save the result as a .md file.",
+      "expected_output": "A saved .md note that uses a policy/current-affairs narrative structure, preserves the article's core logic and important details, marks primary and supplemented sources, includes no fabricated citations, and verifies the file exists.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Turn a classical literary text into a standard English Markdown study note. Do not force argument reconstruction; preserve the author's order, narrative movement, imagery, rhetoric, and historical context.",
+      "expected_output": "A saved .md note whose structure follows the literary/classical material type, includes a reading path, key concepts or motifs, source-grounded explanation, and restrained portable Markdown enhancements if requested.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Turn a folder of mixed source materials about an academic topic into one integrated Markdown study note.",
+      "expected_output": "The skill asks whether to create one integrated note, process files one by one, or use another structure before drafting; if integrated, the note uses a multi-source synthesis structure rather than one mini-summary per file.",
+      "files": []
+    }
+  ]
+}
