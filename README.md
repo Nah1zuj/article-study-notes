@@ -12,16 +12,9 @@ It chooses different narrative structures for different material types: research
 
 For complex, broad, or controversial materials, it asks before adding external web/database scholarship. If external scholarship is used, it is clearly marked; if it is not used, the note says so briefly.
 
-## Showcase
-
-This repository includes a browser-based HTML showcase at `docs/index.html`. When GitHub Pages is enabled from the `docs/` folder, it can be viewed as a live project presentation.
-
 ## Structure
 
 ```text
-docs/
-`-- index.html
-
 article-study-notes/
 |-- SKILL.md
 |-- evals/
