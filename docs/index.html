@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Article Study Notes Skill Showcase</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:opsz,wght@6..72,500;6..72,700&family=Spline+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ===========================================
+       THEME
+       Edit these variables to change the whole deck.
+       =========================================== */
+    :root {
+      --stage-bg: #0d1117;
+      --slide-bg: #f4efe4;
+      --ink: #111827;
+      --muted: #667085;
+      --line: #1f2937;
+      --paper: #f4efe4;
+      --paper-deep: #e7dcc8;
+      --blue: #214cff;
+      --green: #116f4b;
+      --red: #c43c2f;
+      --gold: #c58a1d;
+      --dark: #0d1117;
+      --font-display: "Newsreader", serif;
+      --font-body: "Spline Sans", sans-serif;
+      --font-mono: "IBM Plex Mono", monospace;
+      --ease: cubic-bezier(.16, 1, .3, 1);
+    }
+
+    /* ===========================================
+       RESET
+       Keeps all slide elements predictable.
+       =========================================== */
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-body);
+      color: var(--ink);
+    }
+
+    /* ===========================================
+       FIXED 16:9 STAGE: MANDATORY BASE STYLES
+       Slides are authored at 1920x1080 and scaled as a whole.
+       =========================================== */
+    html,
+    body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+        background: var(--stage-bg, #000);
+    }
+
+    .deck-viewport {
+        position: fixed;
+        inset: 0;
+        overflow: hidden;
+        background: var(--stage-bg, #000);
+    }
+
+    .deck-stage {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        transform-origin: 0 0;
+        background: var(--slide-bg, #fff);
+    }
+
+    .slide {
+        position: absolute;
+        inset: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        display: block;
+        visibility: hidden;
+        opacity: 0;
+        pointer-events: none;
+        background: var(--slide-bg, #fff);
+    }
+
+    .slide.active,
+    .slide.visible {
+        visibility: visible;
+        opacity: 1;
+        pointer-events: auto;
+        z-index: 1;
+    }
+
+    img,
+    video,
+    canvas,
+    svg {
+        max-width: 100%;
+        max-height: 100%;
+    }
+
+    .deck-controls {
+        position: fixed;
+        left: 50%;
+        bottom: 22px;
+        transform: translateX(-50%);
+        z-index: 1000;
+    }
+
+    @media print {
+        html,
+        body {
+            width: 1920px;
+            height: auto;
+            overflow: visible;
+            background: #fff;
+        }
+
+        .deck-viewport {
+            position: static;
+            overflow: visible;
+            background: #fff;
+        }
+
+        .deck-stage {
+            position: static;
+            width: auto;
+            height: auto;
+            transform: none !important;
+            background: none;
+        }
+
+        .slide {
+            position: relative;
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            pointer-events: auto !important;
+            width: 1920px;
+            height: 1080px;
+            break-after: page;
+            page-break-after: always;
+        }
+
+        .slide:last-child {
+            break-after: auto;
+            page-break-after: auto;
+        }
+
+        .deck-controls {
+            display: none !important;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+            animation-duration: 0.01ms !important;
+            transition-duration: 0.2s !important;
+        }
+    }
+
+    /* ===========================================
+       SLIDE CANVAS
+       Shared layout frame, background texture, and page chrome.
+       =========================================== */
+    .slide {
+      padding: 74px 84px;
+      background:
+        radial-gradient(circle at 12% 12%, rgba(33, 76, 255, .12), transparent 28%),
+        radial-gradient(circle at 84% 20%, rgba(196, 60, 47, .10), transparent 22%),
+        linear-gradient(90deg, rgba(17, 24, 39, .055) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(17, 24, 39, .04) 1px, transparent 1px),
+        var(--paper);
+      background-size: auto, auto, 48px 48px, 48px 48px, auto;
+    }
+
+    .slide::before {
+      content: "";
+      position: absolute;
+      inset: 28px;
+      border: 2px solid rgba(17, 24, 39, .82);
+      pointer-events: none;
+    }
+
+    .slide::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      opacity: .24;
+      pointer-events: none;
+      background-image:
+        linear-gradient(120deg, rgba(255,255,255,.34), transparent 18%, transparent 82%, rgba(17,24,39,.08)),
+        repeating-linear-gradient(90deg, transparent 0 7px, rgba(17,24,39,.025) 7px 8px);
+      mix-blend-mode: multiply;
+    }
+
+    .kicker {
+      position: absolute;
+      top: 48px;
+      left: 84px;
+      right: 84px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font: 600 18px/1 var(--font-mono);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      z-index: 3;
+    }
+
+    .folio {
+      position: absolute;
+      right: 84px;
+      bottom: 48px;
+      font: 500 18px/1 var(--font-mono);
+      color: var(--muted);
+      z-index: 3;
+    }
+
+    .rule {
+      height: 2px;
+      background: var(--line);
+      width: 100%;
+      margin: 26px 0 34px;
+    }
+
+    .accent-rule {
+      height: 10px;
+      width: 280px;
+      background: var(--blue);
+      box-shadow: 15px 15px 0 var(--gold);
+      margin: 36px 0;
+    }
+
+    /* ===========================================
+       TYPOGRAPHY
+       Large editorial display type with dense, readable body copy.
+       =========================================== */
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
+      position: relative;
+      z-index: 2;
+    }
+
+    h1 {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 150px;
+      line-height: .88;
+      letter-spacing: 0;
+      max-width: 1250px;
+    }
+
+    h2 {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 92px;
+      line-height: .94;
+      letter-spacing: 0;
+      max-width: 1140px;
+    }
+
+    h3 {
+      font-size: 30px;
+      line-height: 1.1;
+      font-weight: 700;
+    }
+
+    p {
+      font-size: 27px;
+      line-height: 1.36;
+      color: #243041;
+    }
+
+    .mono {
+      font-family: var(--font-mono);
+      font-size: 18px;
+      line-height: 1.45;
+      letter-spacing: .02em;
+    }
+
+    .lead {
+      max-width: 770px;
+      font-size: 34px;
+      line-height: 1.25;
+      color: #182231;
+    }
+
+    .small {
+      font-size: 22px;
+      line-height: 1.34;
+      color: #3c4758;
+    }
+
+    /* ===========================================
+       REVEAL ANIMATION
+       Staggered entrance gives each slide a composed opening.
+       =========================================== */
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity .75s var(--ease), transform .75s var(--ease);
+    }
+
+    .slide.visible .reveal {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .slide.visible .reveal:nth-child(2) { transition-delay: .08s; }
+    .slide.visible .reveal:nth-child(3) { transition-delay: .16s; }
+    .slide.visible .reveal:nth-child(4) { transition-delay: .24s; }
+    .slide.visible .reveal:nth-child(5) { transition-delay: .32s; }
+
+    /* ===========================================
+       LAYOUT UTILITIES
+       Purpose-built slide layouts.
+       =========================================== */
+    .content {
+      position: relative;
+      z-index: 2;
+      height: 100%;
+      padding-top: 76px;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 660px;
+      gap: 70px;
+      align-items: start;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 28px;
+      margin-top: 42px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 32px;
+      margin-top: 44px;
+    }
+
+    .card {
+      border: 2px solid var(--line);
+      background: rgba(255, 255, 255, .34);
+      padding: 28px;
+      min-height: 188px;
+      box-shadow: 12px 12px 0 rgba(17, 24, 39, .13);
+      position: relative;
+      z-index: 2;
+    }
+
+    .card strong {
+      display: block;
+      font: 600 17px/1 var(--font-mono);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: 16px;
+      color: var(--blue);
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-top: 32px;
+      max-width: 840px;
+    }
+
+    .tag {
+      border: 2px solid var(--line);
+      padding: 11px 16px;
+      background: var(--paper-deep);
+      font: 600 18px/1 var(--font-mono);
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+
+    .quote-box {
+      border-left: 14px solid var(--blue);
+      padding-left: 30px;
+      max-width: 940px;
+      margin-top: 36px;
+    }
+
+    .quote-box p {
+      font-family: var(--font-display);
+      font-size: 52px;
+      line-height: 1.02;
+      color: var(--ink);
+    }
+
+    .stat {
+      font-family: var(--font-display);
+      font-size: 108px;
+      line-height: .85;
+      color: var(--blue);
+    }
+
+    .path {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-top: 54px;
+    }
+
+    .path::before {
+      content: "";
+      position: absolute;
+      top: 82px;
+      left: 10%;
+      right: 10%;
+      height: 4px;
+      background: var(--line);
+      z-index: 1;
+    }
+
+    .node {
+      position: relative;
+      z-index: 2;
+      min-height: 250px;
+    }
+
+    .node-number {
+      width: 86px;
+      height: 86px;
+      display: grid;
+      place-items: center;
+      border: 3px solid var(--line);
+      background: var(--paper);
+      color: var(--ink);
+      font: 700 28px/1 var(--font-mono);
+      margin-bottom: 36px;
+    }
+
+    .node:nth-child(2) .node-number { background: #dce6ff; }
+    .node:nth-child(3) .node-number { background: #e1eadb; }
+    .node:nth-child(4) .node-number { background: #f4dacd; }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 38px;
+      position: relative;
+      z-index: 2;
+      font-size: 23px;
+      line-height: 1.25;
+    }
+
+    .table th,
+    .table td {
+      border: 2px solid var(--line);
+      padding: 20px 22px;
+      vertical-align: top;
+      text-align: left;
+      background: rgba(255,255,255,.32);
+    }
+
+    .table th {
+      font: 700 18px/1.1 var(--font-mono);
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--blue);
+      background: var(--paper-deep);
+    }
+
+    .browser-frame {
+      border: 3px solid var(--line);
+      background: #fffdf8;
+      box-shadow: 18px 18px 0 rgba(17, 24, 39, .16);
+      overflow: hidden;
+      position: relative;
+      z-index: 2;
+    }
+
+    .browser-bar {
+      height: 46px;
+      border-bottom: 3px solid var(--line);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 18px;
+      background: #e7dcc8;
+    }
+
+    .dot {
+      width: 14px;
+      height: 14px;
+      border: 2px solid var(--line);
+      border-radius: 50%;
+    }
+
+    .screen {
+      padding: 34px;
+      min-height: 520px;
+    }
+
+    .file-tree {
+      font: 500 23px/1.45 var(--font-mono);
+      white-space: pre;
+      color: #182231;
+    }
+
+    .big-link {
+      display: inline-block;
+      margin-top: 36px;
+      padding: 22px 28px;
+      border: 3px solid var(--line);
+      background: var(--dark);
+      color: #fff;
+      text-decoration: none;
+      font: 600 24px/1 var(--font-mono);
+      box-shadow: 12px 12px 0 var(--blue);
+    }
+
+    .shape {
+      position: absolute;
+      border: 3px solid var(--line);
+      z-index: 1;
+    }
+
+    .shape.blue {
+      width: 250px;
+      height: 250px;
+      right: 150px;
+      top: 150px;
+      background: var(--blue);
+      transform: rotate(10deg);
+    }
+
+    .shape.gold {
+      width: 160px;
+      height: 160px;
+      right: 330px;
+      top: 355px;
+      background: var(--gold);
+      transform: rotate(-9deg);
+    }
+
+    .shape.red {
+      width: 230px;
+      height: 140px;
+      right: 140px;
+      bottom: 140px;
+      background: var(--red);
+      transform: rotate(4deg);
+    }
+
+    .diagram {
+      position: relative;
+      height: 500px;
+      margin-top: 38px;
+      z-index: 2;
+    }
+
+    .diagram-box {
+      position: absolute;
+      width: 340px;
+      min-height: 116px;
+      padding: 20px;
+      border: 3px solid var(--line);
+      background: rgba(255,255,255,.44);
+      box-shadow: 10px 10px 0 rgba(17, 24, 39, .12);
+    }
+
+    .diagram-box b {
+      display: block;
+      font: 700 18px/1 var(--font-mono);
+      color: var(--blue);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .diagram svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+
+    .slide-center {
+      display: grid;
+      align-items: center;
+      height: 100%;
+      padding-top: 0;
+    }
+
+    /* ===========================================
+       CONTROLS
+       Non-slide UI stays outside the authored stage.
+       =========================================== */
+    .deck-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #f7f2e8;
+      font: 600 13px/1 var(--font-mono);
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      background: rgba(13, 17, 23, .78);
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 999px;
+      padding: 10px 16px;
+      backdrop-filter: blur(10px);
+    }
+
+    .deck-controls button {
+      border: 0;
+      background: #f4efe4;
+      color: #0d1117;
+      border-radius: 999px;
+      padding: 8px 12px;
+      font: 700 13px/1 var(--font-mono);
+      cursor: pointer;
+    }
+
+    .progress {
+      width: 150px;
+      height: 6px;
+      border-radius: 99px;
+      background: rgba(255,255,255,.18);
+      overflow: hidden;
+    }
+
+    .progress span {
+      display: block;
+      height: 100%;
+      width: 0;
+      background: #f4efe4;
+      transition: width .35s var(--ease);
+    }
+  </style>
+</head>
+<body>
+  <div class="deck-viewport" aria-label="Article Study Notes Skill showcase deck">
+    <main class="deck-stage" id="deckStage">
+      <section class="slide active visible">
+        <div class="kicker"><span>Codex Skill Showcase</span><span>Nah1zuj/article-study-notes</span></div>
+        <div class="content slide-center">
+          <div>
+            <h1 class="reveal">Article Study Notes</h1>
+            <div class="accent-rule reveal"></div>
+            <p class="lead reveal">A portable Codex skill for turning substantial texts into durable Markdown study notes with the right structure for each material type.</p>
+            <div class="tag-row reveal">
+              <span class="tag">Markdown</span>
+              <span class="tag">Obsidian</span>
+              <span class="tag">Typora</span>
+              <span class="tag">GitHub</span>
+              <span class="tag">VS Code</span>
+            </div>
+          </div>
+        </div>
+        <div class="shape blue"></div>
+        <div class="shape gold"></div>
+        <div class="shape red"></div>
+        <div class="folio">01 / 08</div>
+      </section>
+
+      <section class="slide">
+        <div class="kicker"><span>The Problem</span><span>Generic summaries fail quietly</span></div>
+        <div class="content two-col">
+          <div>
+            <h2 class="reveal">Most notes flatten the text.</h2>
+            <div class="quote-box reveal">
+              <p>Paragraph summaries are easy to make and hard to study from.</p>
+            </div>
+          </div>
+          <div class="grid-2 reveal">
+            <div class="card">
+              <strong>Lost logic</strong>
+              <p class="small">Arguments, methods, narrative movement, and source hierarchy get compressed into vague takeaways.</p>
+            </div>
+            <div class="card">
+              <strong>Wrong shape</strong>
+              <p class="small">A technical paper, policy report, classic text, and literary essay should not share one outline.</p>
+            </div>
+            <div class="card">
+              <strong>Weak retrieval</strong>
+              <p class="small">Notes often work in the chat but not later in a knowledge base, repository, or local Markdown reader.</p>
+            </div>
+            <div class="card">
+              <strong>Source blur</strong>
+              <p class="small">User-provided material and supplemented scholarship can merge unless the workflow marks them clearly.</p>
+            </div>
+          </div>
+        </div>
+        <div class="folio">02 / 08</div>
+      </section>
+
+      <section class="slide">
+        <div class="kicker"><span>Core Behavior</span><span>Interaction before generation</span></div>
+        <div class="content">
+          <h2 class="reveal">The skill asks the questions that affect the note.</h2>
+          <div class="path reveal">
+            <div class="node">
+              <div class="node-number">01</div>
+              <h3>Language</h3>
+              <p class="small">Confirm the note language before drafting instead of guessing from the source.</p>
+            </div>
+            <div class="node">
+              <div class="node-number">02</div>
+              <h3>Depth</h3>
+              <p class="small">Choose concise, standard, or deep so detail matches the user's study need.</p>
+            </div>
+            <div class="node">
+              <div class="node-number">03</div>
+              <h3>Enhancements</h3>
+              <p class="small">Explain portable Markdown options for Obsidian, Typora, GitHub/GitLab, and VS Code.</p>
+            </div>
+            <div class="node">
+              <div class="node-number">04</div>
+              <h3>Sources</h3>
+              <p class="small">Ask before adding external scholarship for broad, complex, or controversial material.</p>
+            </div>
+          </div>
+        </div>
+        <div class="folio">03 / 08</div>
+      </section>
+
+      <section class="slide">
+        <div class="kicker"><span>Material-Type Structures</span><span>Different text, different skeleton</span></div>
+        <div class="content">
+          <h2 class="reveal">It chooses a narrative structure before writing.</h2>
+          <table class="table reveal">
+            <thead>
+              <tr>
+                <th>Material type</th>
+                <th>Organizing logic</th>
+                <th>What must survive</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Research article</td>
+                <td>Problem -> gap -> method -> evidence -> contribution</td>
+                <td>Claims, method, scope, limitations</td>
+              </tr>
+              <tr>
+                <td>Review / survey</td>
+                <td>Field map -> traditions -> unsettled questions</td>
+                <td>Taxonomy, debates, research agenda</td>
+              </tr>
+              <tr>
+                <td>Classic / canonical text</td>
+                <td>Author's order and textual movement</td>
+                <td>Terms, passages, rhetoric, reception</td>
+              </tr>
+              <tr>
+                <td>Literary text</td>
+                <td>Form, voice, imagery, narrative movement</td>
+                <td>How form creates meaning</td>
+              </tr>
+              <tr>
+                <td>Case / policy report</td>
+                <td>Situation -> actors -> evidence -> implications</td>
+                <td>Facts, interpretations, limits</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="folio">04 / 08</div>
+      </section>
+
+      <section class="slide">
+        <div class="kicker"><span>Runtime Contract</span><span>Internal maps, clean final note</span></div>
+        <div class="content">
+          <h2 class="reveal">A hidden contract keeps the output disciplined.</h2>
+          <div class="diagram reveal">
+            <svg viewBox="0 0 1500 500" aria-hidden="true">
+              <defs>
+                <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+                  <path d="M0,0 L12,6 L0,12 Z" fill="#111827"></path>
+                </marker>
+              </defs>
+              <path d="M350 100 C500 100 510 210 650 210" stroke="#111827" stroke-width="5" fill="none" marker-end="url(#arrow)"></path>
+              <path d="M350 360 C505 360 520 260 650 260" stroke="#111827" stroke-width="5" fill="none" marker-end="url(#arrow)"></path>
+              <path d="M990 235 C1110 235 1130 125 1250 125" stroke="#111827" stroke-width="5" fill="none" marker-end="url(#arrow)"></path>
+              <path d="M990 260 C1115 260 1130 380 1250 380" stroke="#111827" stroke-width="5" fill="none" marker-end="url(#arrow)"></path>
+            </svg>
+            <div class="diagram-box" style="left: 10px; top: 35px;">
+              <b>DocumentProfile</b>
+              <p class="small">Title, discipline, material type, language, complexity.</p>
+            </div>
+            <div class="diagram-box" style="left: 10px; top: 300px;">
+              <b>ContentMap</b>
+              <p class="small">Question, concepts, evidence, structure, limits.</p>
+            </div>
+            <div class="diagram-box" style="left: 640px; top: 170px; width: 360px;">
+              <b>StudyOutputPlan</b>
+              <p class="small">Depth, file path, visuals, citation style, batch plan.</p>
+            </div>
+            <div class="diagram-box" style="left: 1260px; top: 65px;">
+              <b>Markdown File</b>
+              <p class="small">Saved, verified, readable across tools.</p>
+            </div>
+            <div class="diagram-box" style="left: 1260px; top: 320px;">
+              <b>References</b>
+              <p class="small">Local and external sources clearly marked.</p>
+            </div>
+          </div>
+        </div>
+        <div class="folio">05 / 08</div>
+      </section>
+
+      <section class="slide">
+        <div class="kicker"><span>Repository Shape</span><span>Installable skill package</span></div>
+        <div class="content two-col">
+          <div>
+            <h2 class="reveal">Small repo. Clear install target.</h2>
+            <p class="lead reveal">The root explains the project. The installable skill lives in one folder with runtime references and evals.</p>
+            <a class="big-link reveal" href="https://github.com/Nah1zuj/article-study-notes">github.com/Nah1zuj/article-study-notes</a>
+          </div>
+          <div class="browser-frame reveal">
+            <div class="browser-bar">
+              <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            </div>
+            <div class="screen">
+              <div class="file-tree">article-study-notes/
+|-- SKILL.md
+|-- evals/
+|   |-- basic_acceptance.md
+|   `-- evals.json
+`-- references/
+    |-- discipline-adapters.md
+    |-- material-type-structures.md
+    |-- output-formats.md
+    |-- runtime-contract.md
+    `-- source-quality.md</div>
+            </div>
+          </div>
+        </div>
+        <div class="folio">06 / 08</div>
+      </section>
+
+      <section class="slide">
+        <div class="kicker"><span>Validation</span><span>What changed after testing</span></div>
+        <div class="content">
+          <h2 class="reveal">The news-article test sharpened the contract.</h2>
+          <div class="grid-3 reveal">
+            <div class="card">
+              <strong>Prompting gap</strong>
+              <p class="small">The first run missed the Obsidian/tooling prompt. It is now part of the acceptance check.</p>
+            </div>
+            <div class="card">
+              <strong>Portable tools</strong>
+              <p class="small">The skill now mentions Obsidian, Typora, GitHub/GitLab, and VS Code before drafting.</p>
+            </div>
+            <div class="card">
+              <strong>Source marking</strong>
+              <p class="small">External scholarship and background sources must be approved and clearly labeled.</p>
+            </div>
+            <div class="card">
+              <strong>Material logic</strong>
+              <p class="small">Classic and literary texts follow the author's movement instead of forced argument reconstruction.</p>
+            </div>
+            <div class="card">
+              <strong>File proof</strong>
+              <p class="small">The generated Markdown file must exist at the intended destination before completion.</p>
+            </div>
+            <div class="card">
+              <strong>Release hygiene</strong>
+              <p class="small">No personal paths, no specialized course residue, MIT license, public GitHub repo.</p>
+            </div>
+          </div>
+        </div>
+        <div class="folio">07 / 08</div>
+      </section>
+
+      <section class="slide">
+        <div class="kicker"><span>Release</span><span>Ready to use</span></div>
+        <div class="content slide-center">
+          <div>
+            <h2 class="reveal">Install the folder. Give it a text. Get a study note that remembers the text's shape.</h2>
+            <div class="accent-rule reveal"></div>
+            <p class="lead reveal">Built for substantial materials: research papers, policy reports, literary works, interviews, technical papers, lecture folders, and mixed-source reading packets.</p>
+            <div class="tag-row reveal">
+              <span class="tag">Ask first</span>
+              <span class="tag">Structure by genre</span>
+              <span class="tag">Mark sources</span>
+              <span class="tag">Save .md</span>
+              <span class="tag">Verify file</span>
+            </div>
+          </div>
+        </div>
+        <div class="folio">08 / 08</div>
+      </section>
+    </main>
+  </div>
+
+  <nav class="deck-controls" aria-label="Slide controls">
+    <button type="button" id="prevBtn" aria-label="Previous slide">Prev</button>
+    <span id="slideLabel">01 / 08</span>
+    <div class="progress" aria-hidden="true"><span id="progressBar"></span></div>
+    <button type="button" id="nextBtn" aria-label="Next slide">Next</button>
+  </nav>
+
+  <script>
+    /* ===========================================
+       SLIDE CONTROLLER
+       Handles scale, keyboard, button, wheel, and touch navigation.
+       =========================================== */
+    class SlidePresentation {
+      constructor() {
+        this.slides = Array.from(document.querySelectorAll(".slide"));
+        this.stage = document.getElementById("deckStage");
+        this.currentSlide = 0;
+        this.label = document.getElementById("slideLabel");
+        this.progress = document.getElementById("progressBar");
+        this.prevBtn = document.getElementById("prevBtn");
+        this.nextBtn = document.getElementById("nextBtn");
+        this.wheelLocked = false;
+        this.touchStartX = 0;
+        this.setupStageScale();
+        this.setupNavigation();
+        this.showSlide(0);
+      }
+
+      setupStageScale() {
+        const scale = () => {
+          const factor = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+          const x = (window.innerWidth - 1920 * factor) / 2;
+          const y = (window.innerHeight - 1080 * factor) / 2;
+          this.stage.style.transform = `translate(${x}px, ${y}px) scale(${factor})`;
+        };
+        scale();
+        window.addEventListener("resize", scale);
+      }
+
+      setupNavigation() {
+        this.prevBtn.addEventListener("click", () => this.prev());
+        this.nextBtn.addEventListener("click", () => this.next());
+
+        document.addEventListener("keydown", (event) => {
+          if (["ArrowRight", "PageDown", " "].includes(event.key)) {
+            event.preventDefault();
+            this.next();
+          }
+          if (["ArrowLeft", "PageUp"].includes(event.key)) {
+            event.preventDefault();
+            this.prev();
+          }
+          if (event.key === "Home") this.showSlide(0);
+          if (event.key === "End") this.showSlide(this.slides.length - 1);
+        });
+
+        window.addEventListener("wheel", (event) => {
+          if (this.wheelLocked) return;
+          this.wheelLocked = true;
+          if (event.deltaY > 0) this.next();
+          if (event.deltaY < 0) this.prev();
+          setTimeout(() => {
+            this.wheelLocked = false;
+          }, 650);
+        }, { passive: true });
+
+        window.addEventListener("touchstart", (event) => {
+          this.touchStartX = event.touches[0].clientX;
+        }, { passive: true });
+
+        window.addEventListener("touchend", (event) => {
+          const delta = event.changedTouches[0].clientX - this.touchStartX;
+          if (Math.abs(delta) < 50) return;
+          if (delta < 0) this.next();
+          if (delta > 0) this.prev();
+        }, { passive: true });
+      }
+
+      showSlide(index) {
+        this.currentSlide = Math.max(0, Math.min(index, this.slides.length - 1));
+        this.slides.forEach((slide, slideIndex) => {
+          const visible = slideIndex === this.currentSlide;
+          slide.classList.toggle("active", visible);
+          slide.classList.toggle("visible", visible);
+        });
+        const total = this.slides.length;
+        const number = String(this.currentSlide + 1).padStart(2, "0");
+        this.label.textContent = `${number} / ${String(total).padStart(2, "0")}`;
+        this.progress.style.width = `${((this.currentSlide + 1) / total) * 100}%`;
+      }
+
+      next() {
+        this.showSlide(this.currentSlide + 1);
+      }
+
+      prev() {
+        this.showSlide(this.currentSlide - 1);
+      }
+    }
+
+    new SlidePresentation();
+  </script>
+</body>
+</html>
